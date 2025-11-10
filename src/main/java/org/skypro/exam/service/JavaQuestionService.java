@@ -1,9 +1,11 @@
 package org.skypro.exam.service;
 
+import org.skypro.exam.exception.UniqueItemRestrictionException;
 import org.skypro.exam.model.question.Question;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -11,6 +13,7 @@ import java.util.Random;
 public class JavaQuestionService implements QuestionServiceInterface {
 
     private final QuestionStorage questionStorage;
+    private final Random randomGenerator = new Random();
 
     public JavaQuestionService(QuestionStorage questionStorage) {
         this.questionStorage = questionStorage;
@@ -18,28 +21,28 @@ public class JavaQuestionService implements QuestionServiceInterface {
     }
 
     private void generateSomeQuestionsOnInit() {
-        int counter = 0;
-
-        while (counter <= 10) {
+        for (int i = 0; i <= 10; i++) {
             this.questionStorage.add(this.getRandomQuestion());
-            counter++;
         }
     }
 
     public Collection<Question> getAll() {
-        return this.questionStorage.getAll().values();
+        return List.copyOf(this.questionStorage.getAll().values());
     }
 
-    public Question getRandomQuestion() {
-        Random random = new Random();
-        int index = random.nextInt(100);
+    private Question getRandomQuestion() {
+        int index = this.randomGenerator.nextInt(100);
 
         return new Question("question-" + index, "answer-" + index);
     }
 
     public Question add(String question, String answer) {
         if (this.find(question, answer).isPresent()) {
-            throw new RuntimeException("Unable to add this item. It's already exists.");
+            throw new UniqueItemRestrictionException(
+                    "Unable to add this Question entity. It's already exists with"
+                            + " Question: " + question
+                            + " Answer: " + answer
+            );
         }
 
         return this.questionStorage.add(new Question(question, answer));

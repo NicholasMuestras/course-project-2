@@ -38,8 +38,7 @@ public class JavaQuestionServiceTest {
 
         assertThat(this.questionService.add("someQuestion", "someAnswer"))
                 .isNotNull()
-                .isInstanceOf(Question.class);
-
+                .hasNoNullFieldsOrProperties();
     }
 
     @Test

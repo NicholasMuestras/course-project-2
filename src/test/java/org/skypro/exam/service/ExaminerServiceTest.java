@@ -4,9 +4,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.skypro.exam.exception.RequestedTooLessException;
+import org.skypro.exam.exception.RequestedTooMuchException;
 import org.skypro.exam.model.question.Question;
 
-import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,18 +41,17 @@ public class ExaminerServiceTest {
     void getSomeRandomQuestions() {
         assertThat(this.examinerService.getRandomQuestions(2))
                 .isNotNull()
-                .isInstanceOf(Collection.class)
-                .satisfies(collection -> Assertions.assertEquals(2, collection.size()))
-                .allSatisfy(object -> assertThat(object).isInstanceOf(Question.class));
+                .satisfies(collection -> assertThat(collection).hasSize(2))
+                .allSatisfy(object -> assertThat(object).isNotNull().hasNoNullFieldsOrProperties());
     }
 
     @Test
     void getTooManyRandomQuestions() {
-        Assertions.assertThrows(RuntimeException.class, () -> this.examinerService.getRandomQuestions(100500));
+        Assertions.assertThrows(RequestedTooMuchException.class, () -> this.examinerService.getRandomQuestions(100500));
     }
 
     @Test
     void getTooLessRandomQuestions() {
-        Assertions.assertThrows(RuntimeException.class, () -> this.examinerService.getRandomQuestions(0));
+        Assertions.assertThrows(RequestedTooLessException.class, () -> this.examinerService.getRandomQuestions(0));
     }
 }

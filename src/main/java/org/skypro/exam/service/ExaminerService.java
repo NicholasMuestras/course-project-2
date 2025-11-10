@@ -1,5 +1,7 @@
 package org.skypro.exam.service;
 
+import org.skypro.exam.exception.RequestedTooLessException;
+import org.skypro.exam.exception.RequestedTooMuchException;
 import org.skypro.exam.model.question.Question;
 import org.springframework.stereotype.Service;
 
@@ -7,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -21,19 +22,19 @@ public class ExaminerService implements ExaminerServiceInterface {
 
     public Collection<Question> getRandomQuestions(int amount) {
         if (amount < 1) {
-            throw new RuntimeException("Too less questions requested.");
+            throw new RequestedTooLessException(amount);
         }
 
         Integer questionsCountAvailable = this.questionService.count();
 
         if (amount > questionsCountAvailable) {
-            throw new RuntimeException("Too many questions requested.");
+            throw new RequestedTooMuchException(questionsCountAvailable, amount);
         }
 
         Collection<Question> questions = this.questionService.getAll();
         List<Question> questionsShuffled = new ArrayList<>(questions.stream().toList());
         Collections.shuffle(questionsShuffled);
 
-        return questionsShuffled.stream().limit(amount).collect(Collectors.toSet());
+        return questionsShuffled.subList(0, amount);
     }
 }
